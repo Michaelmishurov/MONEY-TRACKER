@@ -1,6 +1,6 @@
 # MONEY-TRACKER
-Налаштування бази даних знаходяться в money_tracker/settings.py
-Послідовність команд для запуску:
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
+Налаштування бази даних знаходяться в money_tracker/settings.py<br>
+Послідовність команд для запуску:<br>
+pip install -r requirements.txt<br>
+python manage.py migrate<br>
+python manage.py runserver<br>
