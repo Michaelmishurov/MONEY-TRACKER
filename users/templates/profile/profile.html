@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 50px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .nav-link {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 class="text-center mb-4">Profile</h2>
+	{% if messages %}
+                <div class="mb-3">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+	{% endif %}
+    <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Profile 👨</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="income-tab" data-bs-toggle="tab" data-bs-target="#income" type="button" role="tab" aria-controls="income" aria-selected="false">Income 📥</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="expenses-tab" data-bs-toggle="tab" data-bs-target="#expenses" type="button" role="tab" aria-controls="expenses" aria-selected="false">Expenses 📤</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab" aria-controls="analytics" aria-selected="false">Analytics 🗒️</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="profileTabsContent">
+        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <h3 class="mt-4">Profile Information</h3>
+            <p>Username: {{ user.username }}</p>
+            <p>Email: {{ user.email }}</p>
+			<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png" alt="loading..." width = "100" height="100"/>
+			<br><br>
+			<a href="{% url 'users:exit' %}" class="btn btn-danger">🚪 Logout</a>
+		</div>
+        <div class="tab-pane fade" id="income" role="tabpanel" aria-labelledby="income-tab">
+            <h3 class="mt-4">Income</h3>
+            <p>Here you can manage your income.</p>
+            <!-- Кнопка для відкриття модального вікна -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addIncomeModal">
+                ➕ Add Income
+            </button>
+            <!-- Модальне вікно -->
+            <div class="modal fade" id="addIncomeModal" tabindex="-1" aria-labelledby="addIncomeModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addIncomeModalLabel">Add Income</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{% url 'users:add_income' %}">
+                                {% csrf_token %}
+                                {{ income_form.as_p }}
+                                <button type="submit" class="btn btn-primary">Add Income</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <h3>Your Incomes</h3>
+            <ul class="list-group">
+                {% for income in incomes %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ income.amount }} $ - {{ income.type.name }} - {{ income.date }}
+                        <form method="POST" action="{% url 'users:delete_income' income.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">🗑 Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="tab-pane fade" id="expenses" role="tabpanel" aria-labelledby="expenses-tab">
+            <h3 class="mt-4">Expenses</h3>
+            <p>Here you can manage your expenses.</p>
+            <!-- Кнопка для відкриття модального вікна -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                ➕ Add Expense
+            </button>
+            <!-- Модальне вікно -->
+            <div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addExpenseModalLabel">Add Expense</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{% url 'users:add_expense' %}">
+                                {% csrf_token %}
+                                {{ expense_form.as_p }}
+                                <button type="submit" class="btn btn-primary">Add Expense</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <h3>Your Expenses</h3>
+            <ul class="list-group">
+                {% for expense in expenses %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ expense.amount }} $ - {{ expense.category.name }} - {{ expense.date }}
+                        <form method="POST" action="{% url 'users:delete_expense' expense.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">🗑 Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="tab-pane fade" id="analytics" role="tabpanel" aria-labelledby="analytics-tab">
+            <h3 class="mt-4">Analytics</h3>
+            <div class="mb-3">
+                <h4>Income and Expenses Overview</h4>
+                <p>Total Income: {{ overview.total_income }} $</p>
+                <p>Total Expense: {{ overview.total_expense }} $</p>
+                <p>Balance: {{ overview.balance }} $</p>
+            </div>
+            <div class="mb-3">
+                <h4>Select Month</h4>
+                <form method="get" action="">
+                    <input type="month" name="month" class="form-control" value="{{ selected_month|default_if_none:'' }}">
+                    <button type="submit" class="btn btn-primary mt-2">Filter</button>
+                </form>
+            </div>
+            <div>
+                <h4>Expenses by Category</h4>
+                <canvas id="categoryChart"></canvas>
+            </div>
+            <div>
+                <h4>Income and Expenses Over Time</h4>
+                <canvas id="timeChart"></canvas>
+            </div>
+            <div>
+                <h4>Daily Income and Expenses for Selected Month</h4>
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Збереження вибраної вкладки в localStorage
+    document.addEventListener('DOMContentLoaded', function () {
+        let profileTabs = document.querySelectorAll('#profileTabs button[data-bs-toggle="tab"]');
+        profileTabs.forEach(function (tab) {
+            tab.addEventListener('shown.bs.tab', function (event) {
+                localStorage.setItem('activeTab', event.target.id);
+            });
+        });
+
+        let activeTab = localStorage.getItem('activeTab');
+        if (activeTab) {
+            let tab = document.getElementById(activeTab);
+            let tabInstance = new bootstrap.Tab(tab);
+            tabInstance.show();
+        }
+
+        // Ініціалізація flatpickr для вибору дати
+        flatpickr("input[type='date']", {
+            dateFormat: "Y-m-d",
+        });
+
+        // Ініціалізація Chart.js для аналітики
+        const categoryData = {
+            labels: [{% for category in categories %}'{{ category.category.name }}',{% endfor %}],
+            datasets: [{
+                label: 'Total Spent',
+                data: [{% for category in categories %}{{ category.total_spent }},{% endfor %}],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        };
+        console.log('Category Data:', categoryData);
+
+        const categoryConfig = {
+            type: 'bar',
+            data: categoryData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        };
+
+        const categoryChart = new Chart(
+            document.getElementById('categoryChart'),
+            categoryConfig
+        );
+
+        const timeData = {
+            labels: [{% for time in all_times %}'{{ time.date }}',{% endfor %}],
+            datasets: [
+                {
+                    label: 'Total Income',
+                    data: [{% for time in all_times %}{{ time.total_income }},{% endfor %}],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Total Expense',
+                    data: [{% for time in all_times %}{{ time.total_expense }},{% endfor %}],
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                }
+            ]
+        };
+        console.log('Time Data:', timeData);
+
+        const timeConfig = {
+            type: 'line',
+            data: timeData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        };
+
+        const timeChart = new Chart(
+            document.getElementById('timeChart'),
+            timeConfig
+        );
+
+        const dailyData = {
+            labels: [{% for data in daily_data %}'{{ data.date }}',{% endfor %}],
+            datasets: [
+                {
+                    label: 'Daily Income',
+                    data: [{% for data in daily_data %}{{ data.income }},{% endfor %}],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Daily Expense',
+                    data: [{% for data in daily_data %}{{ data.expense }},{% endfor %}],
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                }
+            ]
+        };
+        console.log('Daily Data:', dailyData);
+
+        const dailyConfig = {
+            type: 'bar',
+            data: dailyData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        };
+
+        const dailyChart = new Chart(
+            document.getElementById('dailyChart'),
+            dailyConfig
+        );
+    });
+</script>
+</body>
+</html>
